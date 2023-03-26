@@ -38,23 +38,36 @@ noteRouter.patch("/update/:noteID", async (req, res) => {
     }
 })
 
-noteRouter.delete("/delete/:noteID", async (req, res) => {
-    const noteID = req.params.noteID;
-    const token = req.headers.authorization.split(" ")[1]
-    const decoded = jwt.verify(token, "masai")
-    const req_id = decoded.userID
-    const note = NoteModel.findOne({ _id: noteID });
-    const userID_in_note = note.userID
-    try {
-        if (req_id === userID_in_note) {
-            await NoteModel.findByIdAndDelete({ _id: noteID });
-            res.status(200).send({ "msg": "Note has been deleted" })
-        } else {
-            res.status(400).send({ "msg": "Not Authorised" })
-        }
+// noteRouter.delete("/delete/:noteID", async (req, res) => {
+//     const noteID = req.params.noteID;
+//     const token = req.headers.authorization.split(" ")[1]
+//     const decoded = jwt.verify(token, "masai")
+//     const req_id = decoded.userID
+//     const note = NoteModel.findOne({ _id: noteID });
+//     const userID_in_note = note.userID
+//     try {
+//         if (req_id === userID_in_note) {
+//             await NoteModel.findByIdAndDelete({ _id: noteID });
+//             res.status(200).send({ "msg": "Note has been deleted" })
+//         } else {
+//             res.status(400).send({ "msg": "Not Authorised" })
+//         }
 
+//     } catch (err) {
+//         res.status(400).send({ "msg": err.message });
+//     }
+// })
+
+noteRouter.delete("/delete/:noteID", async (req, res) => {
+    const noteID = req.params.noteID
+    try {
+        const deletedNote = await NoteModel.findByIdAndDelete({ _id: noteID })
+        if (!deletedNote) {
+            return res.status(404).send({ msg: "Note not found" })
+        }
+        res.status(200).send({ msg: "Note deleted successfully" })
     } catch (err) {
-        res.status(400).send({ "msg": err.message });
+        res.status(400).send({ msg: err.message })
     }
 })
 
